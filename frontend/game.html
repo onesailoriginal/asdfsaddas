@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kő-Papír-Olló</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Kő - Papír - Olló</h1>
+        <div class="choices">
+            <button class="choice" data-choice="rock">✊</button>
+            <button class="choice" data-choice="paper">✋</button>
+            <button class="choice" data-choice="scissors">✌️</button>
+        </div>
+        <p id="result">Válassz egyet!</p>
+        <div class="stats">
+            <p>Győzelem: <span id="wins">0</span></p>
+            <p>Vereség: <span id="losses">0</span></p>
+            <p>Döntetlen: <span id="draws">0</span></p>
+        </div>
+        <button id="reset">Statisztikák törlése</button>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>

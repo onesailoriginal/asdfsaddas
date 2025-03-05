@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    text-align: center;
+    background-color: #f4f4f4;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    margin-top: 50px;
+}
+
+.choices {
+    margin: 20px;
+}
+
+.choice {
+    font-size: 50px;
+    margin: 10px;
+    padding: 10px;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.choice:hover {
+    transform: scale(1.1);
+}
+
+#result {
+    font-size: 24px;
+    margin: 20px 0;
+}
+
+.stats {
+    font-size: 18px;
+}
+
+#reset {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
