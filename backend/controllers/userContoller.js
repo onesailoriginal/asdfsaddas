@@ -17,7 +17,7 @@ exports.checkLogin = async(req, res)=>{
             return res.status(400).json({message: 'Nincs ilyen jelszó', error:'wrongpassword', success:false})
         }
         const token = jwt.sign({userId: user._id}, process.env.JWT_SECRET, {expiresIn: '10m'})
-        res.status(2000).json({token, success:true, message: 'Sikeres bejelentkezés', user})
+        res.status(200).json({token, success:true, message: 'Sikeres bejelentkezés', user})
     }catch(err){
         res.status(500).json({
             message: 'Hiba történt a lekérdezés közben, hiba: ',
@@ -49,7 +49,7 @@ exports.createOneUser = async(req,res)=>{
             username, 
             password: hashedPassword
         })
-        res.status(201).json({
+        res.status(200).json({
             success:true,
             message: 'Felhaszáló létrehozva.',
             user: {
