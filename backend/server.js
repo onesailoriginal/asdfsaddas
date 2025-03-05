@@ -7,7 +7,7 @@ const User = require('./models/User')
 
 
 const port = process.env.PORT
-
+const app = express()
 
 dbHandler.sync().then(()=>{
     console.log('Adatbázis csatlakozás sikers')

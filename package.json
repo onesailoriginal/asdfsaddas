@@ -1,5 +1,11 @@
 {
   "dependencies": {
-    "git": "^0.1.5"
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "git": "^0.1.5",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.12.0",
+    "sequelize": "^6.37.6"
   }
 }
