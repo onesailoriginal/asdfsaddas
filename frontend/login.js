@@ -19,16 +19,14 @@ document.getElementById("loginForm").addEventListener("submit",async function(ev
         })
         if(!res.ok){
             const errorData = await res.json();
+            alert( "Hibás felhasználónév vagy jelszó!");
             throw new Error(errorData.message || 'Hiba történt a kérelem során')
         }
         const data = await res.json()
        if(data.success){
         localStorage.setItem('username', username);
         window.location.href = "game.html";
-       }else{
-        alert(result.message || "Hibás felhasználónév vagy jelszó!");
-
-    }
+       }
     }catch(error){
         console.error('Hiba történt: ', error)
         throw error;

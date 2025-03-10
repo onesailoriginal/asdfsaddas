@@ -6,6 +6,11 @@ const lossesText = document.getElementById("losses");
 const drawsText = document.getElementById("draws");
 const resetButton = document.getElementById("reset");
 const username = localStorage.getItem('username');
+const rockChoice = document.getElementById('rockChoice')
+const paperChoice = document.getElementById('paperChoice')
+const scissorsChoice = document.getElementById('scissorsChoice')
+
+
 
 
 let stats = { wins: 0, loses: 0, draws: 0 };
@@ -13,7 +18,7 @@ let stats = { wins: 0, loses: 0, draws: 0 };
 // Statisztikák betöltése a backendről
 function fetchStats() {
     const username = localStorage.getItem('username');
-    console.log('username'+username)
+    // console.log('username'+username)
     //const username = localStorage.getItem('username')
     const xhr = new XMLHttpRequest();
     xhr.open("GET", `/api/history/${username}`, true); // Módosított URL
@@ -30,46 +35,55 @@ function fetchStats() {
 buttons.forEach(button => {
     button.addEventListener("click", async () => {
         resultText.textContent = "A bot gondolkodik...";
-        try{
-            const playerChoice = button.dataset.choice;
-            const res = await fetch('/api/play', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({"selectedItem": playerChoice}),
-            });
-            
-            const data = await res.json();
-            
-            if(!data.success){
-                resultText.textContent = "Kicsit Elbasztad!";
-                console.error(data.message)
-                return;
+        rockChoice.disabled = true
+        paperChoice.disabled =  true
+        scissorsChoice.disabled = true
+        setTimeout(async () => {   
+            try{
+                const playerChoice = button.dataset.choice;
+                const res = await fetch('/api/play', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({"selectedItem": playerChoice}),
+                });
+                
+                const data = await res.json();
+
+                rockChoice.disabled = false
+                paperChoice.disabled =  false
+                scissorsChoice.disabled = false
+                
+                if(!data.success){
+                    resultText.textContent = "Kicsit Elbasztad!";
+                    // console.error(data.message)
+                    return;
+                }
+                if(data.playerWin){
+                    resultText.textContent = "Nyertél!, a bot választott: "+data.botItem;
+                    winsText.textContent++;
+                    saveCuccs()
+                    return;
+                }
+                if(data.botWin){
+                    resultText.textContent = "Elbasztad!, a bot választott: "+data.botItem;
+                    lossesText.textContent++;
+                    saveCuccs()
+                    return;
+                }
+                else{
+                    resultText.textContent = "Döntetlen!, a bot választott: "+data.botItem;
+                    drawsText.textContent++;
+                    saveCuccs()
+                    return;
+                }
+            }catch(error){
+                resultText.textContent = "Nagyon Elbasztad!";
+                
+                throw error;
             }
-            if(data.playerWin){
-                resultText.textContent = "Nyertél!, a bot választott: "+data.botItem;
-                winsText.textContent++;
-                saveCuccs()
-                return;
-            }
-            if(data.botWin){
-                resultText.textContent = "Elbasztad!, a bot választott: "+data.botItem;
-                lossesText.textContent++;
-                saveCuccs()
-                return;
-            }
-            else{
-                resultText.textContent = "Döntetlen!, a bot választott: "+data.botItem;
-                drawsText.textContent++;
-                saveCuccs()
-                return;
-            }
-        }catch(error){
-            resultText.textContent = "Nagyon Elbasztad!";
-            
-            throw error;
-        }
+             }, 1000)
        
     });
 });
@@ -82,7 +96,7 @@ async function saveCuccs() {
         const draws = parseInt(drawsText.textContent, 10);
         const losses = parseInt(lossesText.textContent, 10);
 
-        console.log(username, wins, draws, losses);
+        // console.log(username, wins, draws, losses);
 
         const res = await fetch('/api/save', {
             method: 'PUT',
@@ -99,11 +113,11 @@ async function saveCuccs() {
         const data = await res.json();
 
         if (!data.success) {
-            console.error('Hiba történt a mentés során:', data.message);
+            // console.error('Hiba történt a mentés során:', data.message);
         }
 
     } catch (err) {
-        console.error('Hiba történt:', err);
+          // console.error('Hiba történt:', err);
         throw err;
     }
 }
