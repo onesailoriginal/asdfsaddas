@@ -24,7 +24,10 @@ document.getElementById("loginForm").addEventListener("submit",async function(ev
         }
         const data = await res.json()
        if(data.success){
-        localStorage.setItem('username', username);
+        sessionStorage.setItem('username', username);
+        sessionStorage.setItem('token', data.token);
+
+        
         window.location.href = "game.html";
        }
     }catch(error){

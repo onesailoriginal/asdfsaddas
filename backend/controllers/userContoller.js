@@ -80,39 +80,41 @@ exports.createOneUser = async (req, res) => {
         });
     }
 };
-exports.getOnePlayerData = async(req,res)=>{
-    const {username} = req.params;
-    try{
+exports.getOnePlayerData = async (req, res) => {
+    const { username } = req.params;
+    try {
         const user = await User.findOne({ where: { username } });
-        if(!user){
-            res.status(500).json({
+
+        if (!user) {
+            return res.status(404).json({ // 404 jobb, mert nem található
                 message: 'Nincs ilyen felhasználó',
                 error: 'notuser',
                 success: false
-            })
+            });
         }
-        res.json(user)
-    }catch(err){
+
+        res.json({ success: true, user });
+
+    } catch (err) {
         res.status(500).json({
-            message: 'Hiba történt a lekérdezés közben, hiba: ',
+            message: 'Hiba történt a lekérdezés közben',
             error: err.message,
             success: false
-        })
+        });
     }
-}
+};
+exports.updateOnePlayer = async (req, res) => {
+    const { username, wins, draws, loses } = req.body;
 
-exports.updateOnePlayer = async(req,res)=>{
-    const {username, wins, draws, loses} = req.body;
-
-    try{
-        if(!username || !wins|| !draws || !loses){
+    try {
+        if (username === undefined || wins === undefined || draws === undefined || loses === undefined) {
             return res.status(400).json({
                 message: 'Adatok küldése kötelező',
                 error: 'emptybody',
                 success: false
-            })
+            });
         }
-        
+
         const user = await User.findOne({ where: { username } });
         if (!user) {
             return res.status(400).json({
@@ -121,21 +123,22 @@ exports.updateOnePlayer = async(req,res)=>{
                 success: false
             });
         }
-        
-        user.wins = wins,
-        user.draws = draws,
-        user.loses = loses,
-        await user.save()
-        res.json({success: true, message: 'Sikeres update'})
-    }catch(err){
+
+        user.wins = wins;
+        user.draws = draws;
+        user.loses = loses;
+        await user.save();
+        res.json({ success: true, message: 'Sikeres update' });
+    } catch (err) {
         res.status(400).json({
             message: 'Hiba történt a lekérdezés közben, hiba: ',
             error: err.message,
             success: false
-        })
+        });
         throw err;
     }
-}
+};
+
 
 exports.resetStats = async (req, res) => {
     const {username} = req.body

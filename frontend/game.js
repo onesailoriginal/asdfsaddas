@@ -1,3 +1,36 @@
+async function checkAuth() {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'index.html'; 
+    } else {
+        try {
+            const response = await fetch('/api/checkToken', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token 
+                }
+            });
+            const data = await response.json();
+            if (!data.success) {
+                sessionStorage.removeItem('token'); 
+                sessionStorage.removeItem('id')
+                window.location.href = 'index.html'; 
+            }
+
+        } catch (error) {
+            console.error('Error during token check:', error);
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('id')
+            window.location.href = 'index.html';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', checkAuth);
+window.addEventListener('beforeunload', function (event) {
+    sessionStorage.removeItem('token'); });
+
 const choices = ["rock", "paper", "scissors"];
 const buttons = document.querySelectorAll(".choice");
 const resultText = document.getElementById("result");
@@ -5,7 +38,7 @@ const winsText = document.getElementById("wins");
 const lossesText = document.getElementById("losses");
 const drawsText = document.getElementById("draws");
 const resetButton = document.getElementById("reset");
-const username = localStorage.getItem('username');
+const username = sessionStorage.getItem('username');
 const rockChoice = document.getElementById('rockChoice')
 const paperChoice = document.getElementById('paperChoice')
 const scissorsChoice = document.getElementById('scissorsChoice')
@@ -13,23 +46,58 @@ const scissorsChoice = document.getElementById('scissorsChoice')
 
 
 
+
 let stats = { wins: 0, loses: 0, draws: 0 };
 
 // Statisztikák betöltése a backendről
-function fetchStats() {
-    const username = localStorage.getItem('username');
-    // console.log('username'+username)
-    //const username = localStorage.getItem('username')
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", `/api/history/${username}`, true); // Módosított URL
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            stats = JSON.parse(xhr.responseText);
-            updateStatsUI();
+async function fetchStats() {
+    try {
+        const token = sessionStorage.getItem('token');
+        const username = sessionStorage.getItem('username');
+
+        if (!token) {
+            console.error("Nincs token elmentve!");
+            return;
         }
-    };
-    xhr.send();
+
+        const res = await fetch(`/api/history/${username}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token             }
+        });
+
+        if (!res.ok) {
+            throw new Error(`Hiba történt: ${res.status} ${res.statusText}`);
+        }
+
+        const data = await res.json();
+       
+
+
+        if (!data.success) {
+            return;
+
+        } else {
+          //  console.log("Siker:", data);
+            // Itt frissítheted a UI-t, pl. updateStatsUI(data);
+            stats = data.user
+            updateStatsUI()
+        }
+
+    } catch (err) {
+        console.error("Hiba:", err);
+    }
 }
+
+    // xhr.onreadystatechange = function () {
+    //     if (xhr.readyState === 4 && xhr.status === 200) {
+    //         stats = JSON.parse(xhr.responseText);
+    //         updateStatsUI();
+    //     }
+    // };
+    // xhr.send();
+
 
 // Játék indítása
 buttons.forEach(button => {
@@ -40,11 +108,13 @@ buttons.forEach(button => {
         scissorsChoice.disabled = true
         setTimeout(async () => {   
             try{
+                const token = sessionStorage.getItem('token');
                 const playerChoice = button.dataset.choice;
                 const res = await fetch('/api/play', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'x-auth-token': token 
                     },
                     body: JSON.stringify({"selectedItem": playerChoice}),
                 });
@@ -90,18 +160,19 @@ buttons.forEach(button => {
 
 async function saveCuccs() {
     try {
-        const username = localStorage.getItem('username');
-
+        const username = sessionStorage.getItem('username');
         const wins = parseInt(winsText.textContent, 10);
         const draws = parseInt(drawsText.textContent, 10);
         const losses = parseInt(lossesText.textContent, 10);
 
+        
         // console.log(username, wins, draws, losses);
-
+        const token = sessionStorage.getItem('token');
         const res = await fetch('/api/save', {
             method: 'PUT',
-            headers: {
+            headers: { 
                 'Content-Type': 'application/json',
+                'x-auth-token': token 
             },
             body: JSON.stringify({
                 username: username,
@@ -113,11 +184,11 @@ async function saveCuccs() {
         const data = await res.json();
 
         if (!data.success) {
-            // console.error('Hiba történt a mentés során:', data.message);
+            return;
         }
+        fetchStats()
 
     } catch (err) {
-          // console.error('Hiba történt:', err);
         throw err;
     }
 }
@@ -130,23 +201,33 @@ function updateStatsUI() {
 
 
 
-resetButton.addEventListener("click", () => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/resetStats", true);
-    xhr.setRequestHeader("Content-Type", "application/json"); // Beállítjuk a Content-Type fejlécet
+resetButton.addEventListener("click", async () => {
 
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            stats = { wins: 0, loses: 0, draws: 0 };
-            fetchStats();
+    try {
+        const username = sessionStorage.getItem('username');
+
+        // console.log(username, wins, draws, losses);
+        const token = sessionStorage.getItem('token');
+        const res = await fetch('/api/resetStats', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'x-auth-token': token 
+            },
+            body: JSON.stringify({
+                username: username,
+            })
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+            return;
         }
-    };
+        fetchStats()
 
-    const username = localStorage.getItem('username');
-    const data = JSON.stringify({ username: username }); // JSON formátumba alakítjuk az adatot
-
-    xhr.send(data); // Elküldjük az adatot a kérés body-jában
+    } catch (err) {
+        throw err;
+    }
 });
 
-// Induláskor betöltjük az adatokat a szerverről
 fetchStats();
